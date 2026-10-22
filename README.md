@@ -1,74 +1,50 @@
-# 🔔 AutoAlertBot (Telegram / GitHub Actions)
+# Me Avise sobre o Estatuto da Igualdade
 
-Um sistema de alertas simples, de código aberto, 100% gratuito e sem necessidade de banco de dados ou servidores.
+Receba uma mensagem no Telegram quando o seu nome aparecer na publicação oficial relacionada com a emissão do Estatuto da Igualdade em Portugal.
 
----
+O objetivo é manter uma solução pequena: consulta diária de uma fonte oficial e alerta quando houver uma correspondência.
 
-## 📌 Visão Geral do Projeto
+**Estado atual:** planeamento. A fonte oficial ainda precisa de ser confirmada; o bot e a execução diária ainda não estão implementados.
 
-Existem eventos, prazos ou ocorrências que acontecem raramente (uma vez por ano ou em intervalos longos). Como o tempo de espera é grande, é fácil esquecer a data.
+## Como deverá funcionar
 
-Este projeto é um utilitário ultraleve para verificar diariamente se um evento/data aconteceu e disparar uma notificação direta no seu **Telegram**, sem precisar manter nenhum servidor ligado e sem a complexidade de gerenciar banco de dados.
+1. Configurar um bot do Telegram e iniciar uma conversa com ele.
+2. Guardar o nome a pesquisar em GitHub Actions Secrets, nunca no código ou nos logs.
+3. O GitHub Actions executa a verificação uma vez por dia.
+4. O script consulta a fonte oficial e distingue correspondência, ausência de correspondência e erro.
+5. Quando confirmar uma correspondência, envia uma mensagem com ligação para a fonte oficial.
 
----
+## Princípios
 
-## 🏗️ Como Funciona a Arquitetura (Sem Banco de Dados)
+- **Simplicidade:** Python e GitHub Actions; sem servidor próprio nem dependências desnecessárias.
+- **Sem base de dados:** não manter uma base de dados de utilizadores; guardar apenas o estado mínimo necessário para evitar alertas repetidos.
+- **Privacidade:** nunca publicar nomes, tokens ou IDs de chat. Não registar o nome pesquisado nos logs.
+- **Fonte oficial:** verificar se a página e o método de consulta são adequados e permitidos antes de automatizar pedidos.
+- **Fiabilidade:** uma falha de rede ou uma página alterada nunca deve ser tratada como resultado negativo.
+- **Cautela:** um nome pode corresponder a mais de uma pessoa. O alerta não substitui a confirmação na publicação oficial.
+- **Custos:** usar o GitHub Actions dentro dos limites do plano aplicável; o horário agendado pode sofrer atrasos.
 
-O projeto roda inteiramente na nuvem do GitHub usando uma estrutura *Serverless*:
+## Configuração prevista
 
-[ Configuração Local / GitHub Secrets ] ──( ID do Telegram + Evento )
-                                                     │
-                                       (Verificação diária via Cron)
-                                                     │
-[ GitHub Actions ] ──( Executa Script Python )───────┘
-        │
-        └──( Envia Notificação HTTP )──> [ Telegram Bot API ] ──> [ Celular do Usuário ]
+A implementação deverá usar estes GitHub Actions Secrets:
 
-1. **Configuração Simples:** Você define a data/evento a ser monitorado e o seu Chat ID do Telegram no próprio código ou nas configurações privadas do repositório (GitHub Secrets).
-2. **Execução Diária (Cron Job):** Uma vez por dia, o **GitHub Actions** "acorda" no horário programado e roda o script de verificação.
-3. **Verificação:** O script testa se a condição do alerta foi atingida.
-4. **Disparo:** Se a condição for verdadeira, o script faz uma chamada HTTP para a API do Telegram e a mensagem chega no seu celular.
-5. **Finalização:** A máquina virtual é desligada sem gerar nenhum custo.
+- `TELEGRAM_BOT_TOKEN`: token criado pelo [@BotFather](https://t.me/BotFather).
+- `TELEGRAM_CHAT_ID`: destino da mensagem no Telegram.
+- `TARGET_NAME`: nome a pesquisar.
 
----
+Não adicione estes valores ao código, a issues, a commits ou a mensagens de log. Nunca partilhe o token do bot.
 
-## 🛠️ Tecnologias Utilizadas
+## Limitações
 
-* **Linguagem Principal:** Python 3.x
-* **Orquestração:** GitHub Actions (`.github/workflows/daily-check.yml`)
-* **Notificações:** Telegram Bot API (100% gratuita e oficial)
-* **Segurança:** GitHub Repository Secrets (para armazenar o Token do Bot e o Chat ID)
+- O serviço só deteta informação disponível na fonte consultada; não confirma o estado administrativo junto da entidade pública.
+- O nome não é um identificador único.
+- O agendamento do GitHub Actions não garante execução ao minuto exato.
+- Evitar notificações repetidas requer guardar um pequeno estado persistente, mas não uma base de dados.
 
----
+## Desenvolvimento
 
-## 📂 Estrutura do Repositório
+Consulte o [roadmap](ROADMAP.md) para as próximas etapas.
 
-├── .github/
-│   └── workflows/
-│       └── daily-check.yml      # Configuração da execução diária do GitHub Actions
-├── main.py                      # Script em Python com a lógica de verificação e envio
-├── requirements.txt             # Dependências (ex: requests)
-└── README.md                    # Documentação do projeto
+## Licença
 
----
-
-## 🚀 Como Configurar e Usar
-
-1. **Criar o Bot no Telegram:**
-   * Fale com o `@BotFather` no Telegram para criar um novo bot e copie o **API Token**.
-   * Abra o bot criado e envie qualquer mensagem (`/start`).
-   * Descubra seu **Chat ID** enviando uma mensagem para o `@userinfobot`.
-
-2. **Configurar o GitHub:**
-   * Faça um fork deste repositório.
-   * Vá em **Settings > Secrets and variables > Actions** e adicione duas secrets:
-     * `TELEGRAM_BOT_TOKEN`: O token fornecido pelo BotFather.
-     * `TELEGRAM_CHAT_ID`: O seu Chat ID obtido no Telegram.
-
-3. **Pronto!** O GitHub Actions cuidará da verificação diária e avisará você quando o momento chegar.
-
----
-
-## 🤝 Contribuição
-
-Este é um projeto aberto! Sinta-se à vontade para abrir *Issues* ou enviar *Pull Requests* para propor melhorias na lógica de verificação dos eventos.
+Ainda não foi escolhida uma licença. Até ser adicionada, não assuma que o código pode ser reutilizado, redistribuído ou modificado livremente.
